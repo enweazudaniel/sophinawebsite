@@ -5,7 +5,7 @@ import { ImageSlider } from "@/components/image-slider"
 import { ScrollingAnnouncement } from "@/components/scrolling-announcement"
 
 const slides = [
-  { url: "https://i.ibb.co/4ZvHJcL1/PXL-20260624-130856164-PORTRAIT.jpg, alt: "Esther" },
+  { url: "https://i.ibb.co/4ZvHJcL1/PXL-20260624-130856164-PORTRAIT.jpg", alt: "Esther" },
   { url: "https://i.ibb.co/p9vC3Hj/PXL-20250319-095044592-PORTRAIT.jpg", alt: "Students at Sophina School" },
     { url: "https://i.ibb.co/xKR8G410/photo-2025-12-03-23-15-02.jpg", alt: "Art and music programs" },
     { url: "https://i.ibb.co/Jw2jqkNx/PXL-20260401-110344914.jpg", alt: "Art s" },
