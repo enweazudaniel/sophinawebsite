@@ -35,7 +35,7 @@ export function SiteFooter() {
               <Youtube className="w-5 h-5" />
             </a>
             <a
-              href="https://www.instagram.com/sophinaschool?igsh=OGJ1cGdvYThhdXZi"
+              href="https://www.instagram.com/sophinaschool"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-pink-500 text-primary-foreground transition-all duration-300 hover:scale-110"
