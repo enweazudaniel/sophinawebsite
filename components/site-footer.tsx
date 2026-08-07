@@ -1,4 +1,4 @@
-import { Youtube, Instagram } from "lucide-react"
+import { Youtube, Instagram, Music2 } from "lucide-react"
 
 export function SiteFooter() {
   return (
@@ -42,6 +42,15 @@ export function SiteFooter() {
               aria-label="Visit our Instagram page"
             >
               <Instagram className="w-5 h-5" />
+            </a>
+            <a
+              href="https://www.tiktok.com/@sophinaschool1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-black text-primary-foreground transition-all duration-300 hover:scale-110"
+              aria-label="Visit our TikTok page"
+            >
+              <Music2 className="w-5 h-5" />
             </a>
           </div>
           <p className="text-center text-primary-foreground/70 text-sm">© {new Date().getFullYear()} Sophina School. All rights reserved.</p>
