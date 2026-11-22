@@ -1,15 +1,20 @@
 import Image from "next/image"
 import type { Metadata } from "next"
 import { ClassImageSlider } from "@/components/class-image-slider"
+import { getAlbums, getStaff } from "@/lib/site-data"
+import { slugOf } from "@/lib/albums"
+
+// Refreshes every minute so photos and staff posted by the Telegram bot appear quickly
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Our School",
   description:
-    "Explore our school facilities, classes, and dedicated staff at Sophina School. From Pre-Nursery to Basic 8, we offer comprehensive education.",
+    "Explore our school facilities, classes, and dedicated staff at Sophina School. From Creche to Senior Secondary, we offer comprehensive education.",
   openGraph: {
     title: "Our School | Sophina School",
     description:
-      "Discover our comprehensive educational programs from Pre-Nursery to Basic 8, and meet our dedicated staff.",
+      "Discover our comprehensive educational programs from Creche to Senior Secondary, and meet our dedicated staff.",
     images: [
       {
         url: "https://i.ibb.co/V0MpQTHv/photo-2025-02-13-08-28-22.jpg",
@@ -568,18 +573,21 @@ const classes = [
         image: "https://i.ibb.co/5hBwY4Tf/photo-2025-12-03-22-33-03.jpg",
         customImages: CSLAB,
       },
+      { name: "SS 3", image: "", customImages: [] as string[] },
+      { name: "SS 2", image: "", customImages: [] as string[] },
+      { name: "SS 1", image: "", customImages: [] as string[] },
       {
-        name: "Basic 9",
+        name: "JSS 3",
         image: "https://i.ibb.co/5hBwY4Tf/photo-2025-12-03-22-33-03.jpg",
         customImages: basic9Images,
       },
       {
-        name: "Basic 8",
+        name: "JSS 2",
         image: "https://i.ibb.co/pjmbvg7v/PXL-20250214-132912272-1-1-1.png",
         customImages: basic8Images,
       },
       {
-        name: "Basic 7",
+        name: "JSS 1",
         image: "https://i.ibb.co/7d5kgRB0/PXL-20250214-132730029-1-1-1.png",
         customImages: basic7Images,
       },
@@ -629,12 +637,12 @@ const staffMembers = [
   },
   {
     name: "Mr. Daniel E.",
-    position: "ICT|Basic 7 - 9 Teacher",
+    position: "ICT|JSS 1 - 3 Teacher",
     image: "https://i.ibb.co/VdWXV1x/photo-2025-04-19-19-03-01.jpg",
   },
   {
     name: "Mrs. Happiness E.",
-    position: "Basic 9 Form Teacher",
+    position: "JSS 3 Form Teacher",
     image: "https://i.ibb.co/1GdjYQyG/photo-2026-02-17-11-12-39.jpg",
   },
   {
@@ -644,7 +652,25 @@ const staffMembers = [
   },
 ]
 
-export default function OurSchoolPage() {
+export default async function OurSchoolPage() {
+  const [albums, liveStaff] = await Promise.all([getAlbums(), getStaff()])
+  const team = liveStaff
+    ? liveStaff.map((m) => ({ name: m.name, position: m.position, image: m.image_url || "" }))
+    : staffMembers
+
+  // Photos saved by the Telegram bot replace the built-in ones. A class with no photos is hidden.
+  const levels = classes
+    .map((level) => ({
+      ...level,
+      sections: level.sections
+        .map((section) => {
+          const fromBot = albums?.[slugOf(section.name)]
+          return { ...section, photos: fromBot && fromBot.length > 0 ? fromBot : section.customImages }
+        })
+        .filter((section) => section.photos.length > 0),
+    }))
+    .filter((level) => level.sections.length > 0)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -672,7 +698,7 @@ export default function OurSchoolPage() {
       </section>
 
       {/* Class Sections */}
-      {classes.map((level, levelIndex) => (
+      {levels.map((level, levelIndex) => (
         <section key={level.level} className={`section-padding ${levelIndex % 2 === 0 ? 'bg-muted/30' : ''}`}>
           <div className="container-premium">
             <div className="text-center mb-16">
@@ -682,7 +708,7 @@ export default function OurSchoolPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {level.sections.map((section) => (
                 <div key={section.name} className="card-elevated overflow-hidden hover:shadow-2xl transition-all duration-300">
-                  <ClassImageSlider className={section.name} customImages={section.customImages} />
+                  <ClassImageSlider className={section.name} customImages={section.photos} />
                   <div className="p-6 text-center">
                     <h3 className="text-xl font-bold text-primary mb-2">{section.name}</h3>
                     <p className="text-sm text-muted-foreground">{level.level}</p>
@@ -703,7 +729,7 @@ export default function OurSchoolPage() {
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {staffMembers.map((staff, index) => (
+          {team.map((staff, index) => (
             <div key={index} className="card-elevated overflow-hidden hover:shadow-2xl transition-all duration-300">
               <div className="relative aspect-square">
                 <Image src={staff.image || "/placeholder.svg"} alt={staff.name} fill className="object-cover hover:scale-105 transition-transform duration-500" />

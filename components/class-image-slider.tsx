@@ -19,10 +19,7 @@ export function ClassImageSlider({ className, customImages }: ClassImageSliderPr
         url,
         alt: `${className} Image ${i + 1}`,
       }))
-    : Array.from({ length: 10 }, (_, i) => ({
-        url: `/placeholder.svg?height=300&width=400&text=${className}_${i + 1}`,
-        alt: `${className} Image ${i + 1}`,
-      }))
+    : []
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length)
@@ -40,25 +37,42 @@ export function ClassImageSlider({ className, customImages }: ClassImageSliderPr
     return () => clearInterval(timer)
   }, [nextSlide])
 
+  if (slides.length === 0) return null
+
+  // Load only the previous, current and next picture (some albums have over 100 photos)
+  const visible = new Set([
+    currentSlide,
+    (currentSlide + 1) % slides.length,
+    (currentSlide - 1 + slides.length) % slides.length,
+  ])
+
   return (
-    <div className="relative aspect-video w-full rounded-lg overflow-hidden">
-      {slides.map((slide, index) => (
-        <Image
-          key={index}
-          src={slide.url || "/placeholder.svg"}
-          alt={slide.alt}
-          fill
-          className={`object-cover transition-opacity duration-1000 ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
-          priority={index === 0}
-          sizes="(max-width: 768px) 100vw, 50vw"
-        />
-      ))}
+    <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
+      {slides.map((slide, index) =>
+        visible.has(index) ? (
+          <Image
+            key={index}
+            src={slide.url}
+            alt={slide.alt}
+            fill
+            className={`object-cover transition-opacity duration-700 ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+            priority={index === 0}
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        ) : null,
+      )}
+      {slides.length > 1 && (
+        <span className="absolute bottom-2 right-3 z-10 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
+          {currentSlide + 1} / {slides.length}
+        </span>
+      )}
       <Button
         variant="ghost"
         size="icon"
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 z-10"
+        aria-label="Previous photo"
         onClick={prevSlide}
       >
         <ChevronLeft className="h-6 w-6 text-white" />
@@ -67,6 +81,7 @@ export function ClassImageSlider({ className, customImages }: ClassImageSliderPr
         variant="ghost"
         size="icon"
         className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 z-10"
+        aria-label="Next photo"
         onClick={nextSlide}
       >
         <ChevronRight className="h-6 w-6 text-white" />

@@ -43,7 +43,7 @@ export function SiteHeader() {
   ]
 
   return (
-    <header className="border-b border-border/50 relative bg-background z-50 backdrop-blur-sm shadow-sm">
+    <header className="sticky top-0 border-b border-border/50 bg-background/95 z-50 backdrop-blur shadow-sm">
       <div className="container mx-auto px-4 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Image

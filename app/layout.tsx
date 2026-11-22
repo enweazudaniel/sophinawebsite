@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     "Sophina School provides high-quality education fostering holistic development of each child through innovative teaching methods and a supportive learning environment.",
-  keywords: ["school", "education", "nursery", "primary school", "Ogwashi-Uku", "Delta State", "Nigeria"],
+  keywords: ["school", "education", "nursery", "primary school", "secondary school", "Ogwashi-Uku", "Delta State", "Nigeria"],
   authors: [{ name: "Sophina School" }],
   creator: "Sophina School",
   openGraph: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     locale: "en_NG",
     url: "https://sophina.vercel.app",
     title: "Sophina School",
-    description: "Quality education for nursery and primary school children in Ogwashi-Uku, Delta State.",
+    description: "Quality education for nursery, primary and secondary school students in Ogwashi-Uku, Delta State.",
     siteName: "Sophina School",
     images: [
       {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Sophina School",
-    description: "Quality education for nursery and primary school children in Ogwashi-Uku, Delta State.",
+    description: "Quality education for nursery, primary and secondary school students in Ogwashi-Uku, Delta State.",
     images: ["https://i.ibb.co/Kv2kM0c/photo-2023-08-07-14-24-24.jpg"],
   },
   robots: {
@@ -51,10 +51,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "your-google-verification-code", // Add your Google verification code
-  },
-  generator: "v0.dev",
 }
 
 export default function RootLayout({

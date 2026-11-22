@@ -8,33 +8,56 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { SchoolMap } from "@/components/school-map"
 
 export default function ApplyPageClient() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    message: "",
-  })
+  const emptyForm = { firstName: "", lastName: "", phone: "", classApplyingFor: "", message: "" }
+  const [formData, setFormData] = useState(emptyForm)
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
+
+  const classOptions = [
+    "Creche",
+    "Pre-Nursery",
+    "Nursery 1",
+    "Nursery 2",
+    "Nursery 3",
+    "Basic 1",
+    "Basic 2",
+    "Basic 3",
+    "Basic 4",
+    "Basic 5",
+    "JSS 1",
+    "JSS 2",
+    "JSS 3",
+    "SS 1",
+    "SS 2",
+    "SS 3",
+  ]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const response = await fetch("https://submit-form.com/HtcilwBDD", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-    if (response.ok) {
-      alert("Form submitted successfully!")
-      setFormData({ firstName: "", lastName: "", message: "" })
-    } else {
-      alert("Form submission failed. Please try again.")
+    setStatus("sending")
+    try {
+      const response = await fetch("https://submit-form.com/HtcilwBDD", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+      if (response.ok) {
+        setStatus("success")
+        setFormData(emptyForm)
+      } else {
+        setStatus("error")
+      }
+    } catch {
+      setStatus("error")
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
@@ -107,28 +130,75 @@ export default function ApplyPageClient() {
               </div>
 
               <div>
+                <Label htmlFor="phone" className="text-base font-semibold text-foreground mb-2 block">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  className="h-12 text-base transition-all duration-300 focus:ring-2 focus:ring-primary/50"
+                  placeholder="e.g. 0803 000 0000"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="classApplyingFor" className="text-base font-semibold text-foreground mb-2 block">Class Applying For</Label>
+                <select
+                  id="classApplyingFor"
+                  name="classApplyingFor"
+                  value={formData.classApplyingFor}
+                  onChange={handleChange}
+                  required
+                  className="h-12 w-full rounded-md border border-input bg-background px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  <option value="">Select a class</option>
+                  {classOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <Label htmlFor="message" className="text-base font-semibold text-foreground mb-2 block">Message</Label>
                 <Textarea
                   id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="Please include your phone number and any relevant information..."
+                  placeholder="Tell us about the child and anything we should know..."
                   className="min-h-[150px] text-base transition-all duration-300 focus:ring-2 focus:ring-primary/50 p-4 rounded-lg"
                   required
                 />
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
+                disabled={status === "sending"}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg transition-all duration-300 hover:shadow-lg"
               >
-                Submit Application
+                {status === "sending" ? "Sending..." : "Submit Application"}
               </Button>
+
+              {status === "success" && (
+                <p role="status" className="rounded-md bg-green-100 p-4 text-center font-medium text-green-800">
+                  Thank you! We have received your application and will contact you soon.
+                </p>
+              )}
+              {status === "error" && (
+                <p role="alert" className="rounded-md bg-red-100 p-4 text-center font-medium text-red-800">
+                  Sorry, your application could not be sent. Please try again or call 07038046878.
+                </p>
+              )}
             </form>
           </div>
         </div>
       </section>
+
+      <SchoolMap />
     </div>
   )
 }
