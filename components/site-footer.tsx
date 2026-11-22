@@ -4,7 +4,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-primary text-primary-foreground border-t border-primary/10 py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-12 mb-12 text-center md:text-center">
+        <div className="grid md:grid-cols-4 gap-12 mb-12 text-center">
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">SCHOOL ADDRESS</h3>
             <p className="text-primary-foreground/90 text-sm leading-relaxed">
@@ -16,10 +16,30 @@ export function SiteFooter() {
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">CONTACT US</h3>
             <p className="text-primary-foreground/90 text-sm leading-relaxed">
-              Phone: 07038046878,08027446756
+              Phone:{" "}
+              <a href="tel:07038046878" className="underline-offset-4 hover:underline">07038046878</a>,{" "}
+              <a href="tel:08027446756" className="underline-offset-4 hover:underline">08027446756</a>
               <br />
-              Email: sophina4christ@gmail.com
+              Email:{" "}
+              <a href="mailto:sophina4christ@gmail.com" className="underline-offset-4 hover:underline">sophina4christ@gmail.com</a>
             </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-lg tracking-wide mb-4">QUICK LINKS</h3>
+            <ul className="space-y-2 text-sm text-primary-foreground/90">
+              <li><a href="/" className="hover:underline">Home</a></li>
+              <li><a href="/apply" className="hover:underline">Admissions</a></li>
+              <li><a href="/our-school" className="hover:underline">Our School</a></li>
+              <li><a href="/about" className="hover:underline">Mission &amp; Vision</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-bold text-lg tracking-wide mb-4">STUDENT PORTALS</h3>
+            <ul className="space-y-2 text-sm text-primary-foreground/90">
+              <li><a href="https://sophinacbt.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:underline">CBT Portal</a></li>
+              <li><a href="https://sophinaedu.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline">E-Learning</a></li>
+              <li><a href="https://sophinarslt.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline">Results</a></li>
+            </ul>
           </div>
         </div>
         

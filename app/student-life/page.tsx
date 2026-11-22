@@ -60,7 +60,7 @@ export default function StudentLifePage() {
               <p className="text-muted-foreground">Nurturing minds and building confidence</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {level.sections.map((section) => (
+              {level.sections.filter((section) => !section.image.startsWith("/placeholder")).map((section) => (
                 <div key={section.name} className="card-elevated overflow-hidden hover:shadow-2xl transition-all duration-300">
                   <div className="relative aspect-video">
                     <Image src={section.image || "/placeholder.svg"} alt={section.name} fill className="object-cover hover:scale-105 transition-transform duration-500" />
