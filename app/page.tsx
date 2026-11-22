@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ImageSlider } from "@/components/image-slider"
 import { ScrollingAnnouncement } from "@/components/scrolling-announcement"
 import { PenTool, BookOpen, Award } from "lucide-react"
+import { SchoolMap } from "@/components/school-map"
 
 const slides = [
   { url: "https://i.ibb.co/4ZvHJcL1/PXL-20260624-130856164-PORTRAIT.jpg", alt: "Student at Sophina School" },
@@ -245,6 +246,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Map */}
+      <SchoolMap />
 
       {/* Application CTA */}
       <section className="section-padding bg-muted/40">

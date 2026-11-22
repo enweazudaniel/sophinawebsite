@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { SchoolMap } from "@/components/school-map"
 
 export default function ApplyPageClient() {
   const emptyForm = { firstName: "", lastName: "", phone: "", classApplyingFor: "", message: "" }
@@ -197,6 +198,8 @@ export default function ApplyPageClient() {
           </div>
         </div>
       </section>
+
+      <SchoolMap />
     </div>
   )
 }
