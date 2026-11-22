@@ -5,6 +5,10 @@ import { ImageSlider } from "@/components/image-slider"
 import { ScrollingAnnouncement } from "@/components/scrolling-announcement"
 import { PenTool, BookOpen, Award } from "lucide-react"
 import { SchoolMap } from "@/components/school-map"
+import { getAlbums, getNews, formatPostDate } from "@/lib/site-data"
+
+// The page refreshes itself every minute, so news and photos posted by the Telegram bot appear quickly
+export const revalidate = 60
 
 const slides = [
   { url: "https://i.ibb.co/4ZvHJcL1/PXL-20260624-130856164-PORTRAIT.jpg", alt: "Student at Sophina School" },
@@ -18,13 +22,54 @@ const slides = [
   { url: "https://i.ibb.co/DHmGBPKX/PXL-20260128-102733820.jpg", alt: "Classroom activities" },
 ]
 
+const staticNews: { title: string; date: string; image?: string; description: string }[] = [
+            {
+              title: "Annual Colour Day",
+              date: "April 4, 2025",
+              image: "/images/colour-day.jpeg",
+              description:
+                "Students showcased their team spirit and sportsmanship during our vibrant Annual Colour Day, with teams competing in various sporting activities while dressed in their house colors of blue, yellow, and green.",
+            },
+            {
+              title: "Second Term Mid-term Break",
+              date: "February 14, 2024",
+              image: "https://i.ibb.co/9QvdnNY/PXL-20250213-084232933-1-1-1.png",
+              description: "Students recharged and reconnected during our Second Term Mid-term Break",
+            },
+            {
+              title: "End of Year Party",
+              date: "December 9, 2025",
+              description:
+                "Our Year End Students celebrated their achievements and camaraderie at our festive End of Year Party",
+            },
+            {
+              title: "New Session Begins 2025/2026",
+              date: "September 8, 2025",
+              image: "https://i.ibb.co/Bdm6Y3V/PXL-20250310-082559334.jpg",
+              description:
+                "We're excited to welcome new and returning students as we kick off another year of learning and growth at Sophina School",
+            },
+          ]
+
 const portals = [
   { href: "https://sophinacbt.vercel.app/", label: "CBT Portal", text: "Take tests and exams online", Icon: PenTool },
   { href: "https://sophinaedu.vercel.app", label: "E-Learning", text: "Access online classroom resources", Icon: BookOpen },
   { href: "https://sophinarslt.vercel.app", label: "Results", text: "Check your exam results", Icon: Award },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [liveNews, albums] = await Promise.all([getNews(6), getAlbums()])
+  const newsItems = liveNews
+    ? liveNews.map((n) => ({
+        title: n.title,
+        date: formatPostDate(n.posted_at),
+        image: n.image_url || undefined,
+        description: n.body,
+      }))
+    : staticNews
+  const heroSlides = albums?.["home-hero"]?.length
+    ? albums["home-hero"].map((url) => ({ url, alt: "Sophina School" }))
+    : slides
   return (
     <div className="min-h-screen bg-background">
       {/* Scrolling Announcement */}
@@ -32,7 +77,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <ImageSlider
-        slides={slides}
+        slides={heroSlides}
         title="Welcome to Sophina School"
         subtitle="Nurturing a love for learning and building strong character, in Ogwashi-Uku, Delta State."
       />
@@ -160,34 +205,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="grid gap-6 max-w-4xl mx-auto">
-          {([
-            {
-              title: "Annual Colour Day",
-              date: "April 4, 2025",
-              image: "/images/colour-day.jpeg",
-              description:
-                "Students showcased their team spirit and sportsmanship during our vibrant Annual Colour Day, with teams competing in various sporting activities while dressed in their house colors of blue, yellow, and green.",
-            },
-            {
-              title: "Second Term Mid-term Break",
-              date: "February 14, 2024",
-              image: "https://i.ibb.co/9QvdnNY/PXL-20250213-084232933-1-1-1.png",
-              description: "Students recharged and reconnected during our Second Term Mid-term Break",
-            },
-            {
-              title: "End of Year Party",
-              date: "December 9, 2025",
-              description:
-                "Our Year End Students celebrated their achievements and camaraderie at our festive End of Year Party",
-            },
-            {
-              title: "New Session Begins 2025/2026",
-              date: "September 8, 2025",
-              image: "https://i.ibb.co/Bdm6Y3V/PXL-20250310-082559334.jpg",
-              description:
-                "We're excited to welcome new and returning students as we kick off another year of learning and growth at Sophina Nursery & Primary School",
-            },
-          ] as { title: string; date: string; image?: string; description: string }[]).map((news, i) => (
+          {newsItems.map((news, i) => (
             <div key={i} className="card-premium flex gap-6 items-start hover:shadow-xl transition-all duration-300">
               {news.image && (
                 <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">

@@ -1,12 +1,12 @@
 import { MapPin, Phone, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-// To pin the school exactly: open Google Maps, find the school, press Share, copy the place name or
-// address, and paste it between the quotes below. (Free, no account or API key needed.)
-const MAP_QUERY = "Off Polytechnic Road, Ogwashi-Uku, Delta State, Nigeria"
+// Exact pin of Sophina School on Google Maps (free, no account or API key needed).
+const LAT = 6.2092263
+const LNG = 6.5603047
 
-const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&z=16&output=embed`
-const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAP_QUERY)}`
+const embedUrl = `https://maps.google.com/maps?q=${LAT},${LNG}&z=17&output=embed`
+const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`
 
 export function SchoolMap() {
   return (
