@@ -6,48 +6,27 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Menu, X, BookOpen, PenTool, Award } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { DEFAULT_MENU, type Menu as SiteMenu } from "@/lib/content"
 
-export function SiteHeader() {
+export function SiteHeader({ logo, menu }: { logo?: string; menu?: SiteMenu }) {
+  const m = menu ?? DEFAULT_MENU
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/apply", label: "Admissions" },
-    { href: "/our-school", label: "Our School" },
-    { href: "/about", label: "Mission & Vision" },
-  ]
+  const navItems = m.nav
 
-  const platformLinks = [
-    {
-      href: "https://sophinacbt.vercel.app/",
-      label: "CBT Portal",
-      icon: <PenTool className="h-4 w-4 mr-1" />,
-      description: "Take tests and exams online",
-    },
-    {
-      href: "https://sophinaedu.vercel.app",
-      label: "E-Learning",
-      icon: <BookOpen className="h-4 w-4 mr-1" />,
-      description: "Access online classroom resources",
-    },
-    {
-      href: "https://sophinarslt.vercel.app",
-      label: "Results",
-      icon: <Award className="h-4 w-4 mr-1" />,
-      description: "Check your exam results",
-    },
-  ]
+  const icons = [<PenTool key="p" className="h-4 w-4 mr-1" />, <BookOpen key="b" className="h-4 w-4 mr-1" />, <Award key="a" className="h-4 w-4 mr-1" />]
+  const platformLinks = m.portals.map((p, i) => ({ href: p.href, label: p.label, icon: icons[i], description: p.text }))
 
   return (
     <header className="sticky top-0 border-b border-border/50 bg-background/95 z-50 backdrop-blur shadow-sm">
       <div className="container mx-auto px-4 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="https://i.ibb.co/Kv2kM0c/photo-2023-08-07-14-24-24.jpg"
+            src={logo || "https://i.ibb.co/Kv2kM0c/photo-2023-08-07-14-24-24.jpg"}
             alt="Sophina School Logo"
             width={70}
             height={70}
@@ -86,7 +65,7 @@ export function SiteHeader() {
           <ThemeToggle />
 
           <Link href="/apply" className="hidden md:block">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:shadow-lg">Apply</Button>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:shadow-lg">{m.apply}</Button>
           </Link>
         </div>
 
@@ -133,7 +112,7 @@ export function SiteHeader() {
             </div>
 
             <Link href="/apply" className="mt-4" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-primary hover:bg-primary/90">Apply</Button>
+              <Button className="w-full bg-primary hover:bg-primary/90">{m.apply}</Button>
             </Link>
           </nav>
         </div>

@@ -1,5 +1,6 @@
 import { MapPin, Phone, Navigation } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DEFAULTS, telHref } from "@/lib/content"
 
 // Exact pin of Sophina School on Google Maps (free, no account or API key needed).
 const LAT = 6.2092263
@@ -8,7 +9,14 @@ const LNG = 6.5603047
 const embedUrl = `https://maps.google.com/maps?q=${LAT},${LNG}&z=17&output=embed`
 const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`
 
-export function SchoolMap() {
+type SchoolMapProps = { address1?: string; address2?: string; phone1?: string; phone2?: string }
+
+export function SchoolMap({
+  address1 = DEFAULTS["address-1"],
+  address2 = DEFAULTS["address-2"],
+  phone1 = DEFAULTS["phone-1"],
+  phone2 = DEFAULTS["phone-2"],
+}: SchoolMapProps) {
   return (
     <section className="section-padding container-premium">
       <div className="text-center mb-12">
@@ -23,18 +31,18 @@ export function SchoolMap() {
             <MapPin className="h-6 w-6 shrink-0 text-primary" />
             <p className="text-muted-foreground leading-relaxed">
               <span className="block font-semibold text-foreground">School Address</span>
-              Off Polytechnic Road
+              {address1}
               <br />
-              Ogwashi-Uku, Delta State, 320109
+              {address2}
             </p>
           </div>
           <div className="flex gap-3">
             <Phone className="h-6 w-6 shrink-0 text-primary" />
             <p className="text-muted-foreground leading-relaxed">
               <span className="block font-semibold text-foreground">Call Us</span>
-              <a href="tel:07038046878" className="hover:underline">07038046878</a>
+              <a href={telHref(phone1)} className="hover:underline">{phone1}</a>
               <br />
-              <a href="tel:08027446756" className="hover:underline">08027446756</a>
+              <a href={telHref(phone2)} className="hover:underline">{phone2}</a>
             </p>
           </div>
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="block">

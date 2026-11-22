@@ -10,7 +10,21 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { SchoolMap } from "@/components/school-map"
 
-export default function ApplyPageClient() {
+export type ApplyContent = {
+  heroImage: string
+  heroTitle: string
+  heading: string
+  text: string
+  helpTitle: string
+  helpText: string
+  success: string
+  phone1: string
+  phone2: string
+  address1: string
+  address2: string
+}
+
+export default function ApplyPageClient({ content }: { content: ApplyContent }) {
   const emptyForm = { firstName: "", lastName: "", phone: "", classApplyingFor: "", message: "" }
   const [formData, setFormData] = useState(emptyForm)
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
@@ -66,14 +80,14 @@ export default function ApplyPageClient() {
       {/* Hero Section */}
       <div className="relative h-96 md:h-[500px] w-full overflow-hidden">
         <Image
-          src="https://i.ibb.co/yFD8y6Hf/PXL-20250326-094408031.jpg"
+          src={content.heroImage}
           alt="Faculty & Staff"
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-center justify-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-white text-center px-4 drop-shadow-lg">Apply Now</h1>
+          <h1 className="text-5xl md:text-7xl font-bold text-white text-center px-4 drop-shadow-lg">{content.heroTitle}</h1>
         </div>
       </div>
 
@@ -83,18 +97,16 @@ export default function ApplyPageClient() {
           {/* Left Column */}
           <div className="space-y-8 animate-fade-in-up">
             <div>
-              <h2 className="text-primary mb-6">Applications for the 2026-27 School Year are now open!</h2>
+              <h2 className="text-primary mb-6">{content.heading}</h2>
               <p className="text-lg text-muted-foreground leading-8 mb-6">
-                At Sophina School, we believe in providing a rigorous and inclusive educational
-                environment for every learner. We welcome students from all backgrounds and look forward to reviewing your
-                application.
+                {content.text}
               </p>
               <div className="card-premium bg-muted/50 border-primary/20">
-                <p className="text-lg font-semibold text-primary mb-3">Have Questions?</p>
+                <p className="text-lg font-semibold text-primary mb-3">{content.helpTitle}</p>
                 <p className="text-muted-foreground">
-                  Contact our admissions office:
+                  {content.helpText}
                   <br />
-                  <span className="font-semibold text-foreground">07038046878, 08027446756</span>
+                  <span className="font-semibold text-foreground">{content.phone1}, {content.phone2}</span>
                 </p>
               </div>
             </div>
@@ -185,12 +197,12 @@ export default function ApplyPageClient() {
 
               {status === "success" && (
                 <p role="status" className="rounded-md bg-green-100 p-4 text-center font-medium text-green-800">
-                  Thank you! We have received your application and will contact you soon.
+                  {content.success}
                 </p>
               )}
               {status === "error" && (
                 <p role="alert" className="rounded-md bg-red-100 p-4 text-center font-medium text-red-800">
-                  Sorry, your application could not be sent. Please try again or call 07038046878.
+                  Sorry, your application could not be sent. Please try again or call {content.phone1}.
                 </p>
               )}
             </form>
@@ -198,7 +210,7 @@ export default function ApplyPageClient() {
         </div>
       </section>
 
-      <SchoolMap />
+      <SchoolMap address1={content.address1} address2={content.address2} phone1={content.phone1} phone2={content.phone2} />
     </div>
   )
 }

@@ -35,6 +35,27 @@ Keep the bot token and the service key private. Only people in `ADMIN_TELEGRAM_I
 | Add a staff member | Photo with caption `#staff Mrs. Jane D. | Class Teacher` |
 | See / remove staff | `/stafflist` then `/deletestaff 7` |
 
+### Change the website's text, logo, video and links
+
+| You want to... | Send |
+|---|---|
+| See which pages you can edit | `/content` |
+| See every text/picture on a page (names shown) | `/content home` (also `about`, `our-school`, `apply`, `menu`, `seo`, `site`) |
+| Change a text | `/set welcome-title Your new heading` |
+| Change the scrolling message | `/ticker Fees are due on Monday` (hide it: `/ticker off`) |
+| Change the welcome video | `/youtube https://youtu.be/xxxxxxxxxxx` |
+| Change the school logo or any picture | One photo with caption `#logo` (or `#mission-image`, `#feature1-image`, `#apply-hero-image` ...) |
+| Change phone, email, address, social links | `/set phone-1 0803...`, `/set email ...`, `/set address-1 ...`, `/set instagram https://...` |
+| Rename a menu item or change a CBT / E-Learning / Results button | `/set nav-admissions Apply Here`, `/set portal1-label Exams`, `/set portal1-link https://...` |
+| Change what Google and WhatsApp show | `/set seo-about-title ...`, `/set seo-about-description ...`, photo caption `#seo-share-image` |
+| Go back to the original | `/reset logo` (use the same name) |
+
+Texts you have changed are marked with a star `*` in `/content home`. Names are shown in `/content`; they never contain spaces.
+Class photos and staff are still managed with the albums and `#staff` commands above.
+
+### One-time step when you add this feature
+In Supabase open **SQL Editor** > paste everything from `supabase/site_content.sql` > Run. (Do not run `sophina_site_setup.sql` again.)
+
 Album `home-hero` is the big slideshow on the home page. Send pictures as **Photo**, not as File.
 A class with no photos is hidden on the website, and SS 1 - SS 3 appear as soon as you add their first photo.
 The website refreshes by itself within a minute.

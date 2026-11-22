@@ -1,5 +1,6 @@
 // Reads the live content (news, photo albums, staff) that the Telegram bot saves in Supabase.
 // If Supabase is not set up yet, every function returns null and the pages use their built-in content.
+import { DEFAULTS } from "./content"
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -51,4 +52,17 @@ export function formatPostDate(iso: string) {
     year: "numeric",
     timeZone: "Africa/Lagos",
   })
+}
+
+// Texts, pictures and links edited from the bot (/set, /ticker, /youtube, #photo captions).
+// c("key") gives the changed value, or the built-in text if it was never changed (or the database is unreachable).
+export type Content = (key: string) => string
+
+export async function getContent(): Promise<Content> {
+  const rows = await rest<{ key: string; value: string }[]>("site_content?select=key,value")
+  const changed = new Map((rows ?? []).map((r) => [r.key, r.value]))
+  return (key) => {
+    const v = changed.get(key)
+    return v !== undefined && v.trim() !== "" ? v : (DEFAULTS[key] ?? "")
+  }
 }

@@ -3,66 +3,74 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
+import { getContent } from "@/lib/site-data"
+import { menuFrom } from "@/lib/content"
 import type { Metadata } from "next"
 import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: {
-    default: "Sophina School",
-    template: "%s | Sophina School",
-  },
-  description:
-    "Sophina School provides high-quality education fostering holistic development of each child through innovative teaching methods and a supportive learning environment.",
-  keywords: ["school", "education", "nursery", "primary school", "secondary school", "Ogwashi-Uku", "Delta State", "Nigeria"],
-  authors: [{ name: "Sophina School" }],
-  creator: "Sophina School",
-  openGraph: {
-    type: "website",
-    locale: "en_NG",
-    url: "https://sophina.vercel.app",
-    title: "Sophina School",
-    description: "Quality education for nursery, primary and secondary school students in Ogwashi-Uku, Delta State.",
-    siteName: "Sophina School",
-    images: [
-      {
-        url: "https://i.ibb.co/Kv2kM0c/photo-2023-08-07-14-24-24.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Sophina School Logo",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Sophina School",
-    description: "Quality education for nursery, primary and secondary school students in Ogwashi-Uku, Delta State.",
-    images: ["https://i.ibb.co/Kv2kM0c/photo-2023-08-07-14-24-24.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent()
+  const name = c("seo-site-title")
+  const shareText = c("seo-share-text")
+  const shareImage = c("seo-share-image")
+  return {
+    title: {
+      default: name,
+      template: `%s | ${name}`,
+    },
+    description: c("seo-site-description"),
+    keywords: ["school", "education", "nursery", "primary school", "secondary school", "Ogwashi-Uku", "Delta State", "Nigeria"],
+    authors: [{ name: "Sophina School" }],
+    creator: "Sophina School",
+    openGraph: {
+      type: "website",
+      locale: "en_NG",
+      url: "https://sophina.vercel.app",
+      title: name,
+      description: shareText,
+      siteName: "Sophina School",
+      images: [
+        {
+          url: shareImage,
+          width: 1200,
+          height: 630,
+          alt: "Sophina School Logo",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description: shareText,
+      images: [shareImage],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
+  }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const c = await getContent()
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SiteHeader />
+          <SiteHeader logo={c("logo")} menu={menuFrom(c)} />
           <main>{children}</main>
           <SiteFooter />
         </ThemeProvider>

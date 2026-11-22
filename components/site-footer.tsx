@@ -1,6 +1,10 @@
 import { Youtube, Instagram, Music2 } from "lucide-react"
+import { getContent } from "@/lib/site-data"
+import { telHref, safeLink, menuFrom, DEFAULTS } from "@/lib/content"
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const c = await getContent()
+  const menu = menuFrom(c)
   return (
     <footer className="bg-primary text-primary-foreground border-t border-primary/10 py-16">
       <div className="container mx-auto px-4">
@@ -8,37 +12,36 @@ export function SiteFooter() {
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">SCHOOL ADDRESS</h3>
             <p className="text-primary-foreground/90 text-sm leading-relaxed">
-              Off Polytechnic Road
+              {c("address-1")}
               <br />
-              Ogwashi-Uku,Delta State, 320109
+              {c("address-2")}
             </p>
           </div>
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">CONTACT US</h3>
             <p className="text-primary-foreground/90 text-sm leading-relaxed">
               Phone:{" "}
-              <a href="tel:07038046878" className="underline-offset-4 hover:underline">07038046878</a>,{" "}
-              <a href="tel:08027446756" className="underline-offset-4 hover:underline">08027446756</a>
+              <a href={telHref(c("phone-1"))} className="underline-offset-4 hover:underline">{c("phone-1")}</a>,{" "}
+              <a href={telHref(c("phone-2"))} className="underline-offset-4 hover:underline">{c("phone-2")}</a>
               <br />
               Email:{" "}
-              <a href="mailto:sophina4christ@gmail.com" className="underline-offset-4 hover:underline">sophina4christ@gmail.com</a>
+              <a href={`mailto:${c("email")}`} className="underline-offset-4 hover:underline">{c("email")}</a>
             </p>
           </div>
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">QUICK LINKS</h3>
             <ul className="space-y-2 text-sm text-primary-foreground/90">
-              <li><a href="/" className="hover:underline">Home</a></li>
-              <li><a href="/apply" className="hover:underline">Admissions</a></li>
-              <li><a href="/our-school" className="hover:underline">Our School</a></li>
-              <li><a href="/about" className="hover:underline">Mission &amp; Vision</a></li>
+              {menu.nav.map((item) => (
+                <li key={item.href}><a href={item.href} className="hover:underline">{item.label}</a></li>
+              ))}
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-lg tracking-wide mb-4">STUDENT PORTALS</h3>
             <ul className="space-y-2 text-sm text-primary-foreground/90">
-              <li><a href="https://sophinacbt.vercel.app/" target="_blank" rel="noopener noreferrer" className="hover:underline">CBT Portal</a></li>
-              <li><a href="https://sophinaedu.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline">E-Learning</a></li>
-              <li><a href="https://sophinarslt.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline">Results</a></li>
+              {menu.portals.map((item) => (
+                <li key={item.label}><a href={item.href} target="_blank" rel="noopener noreferrer" className="hover:underline">{item.label}</a></li>
+              ))}
             </ul>
           </div>
         </div>
@@ -46,7 +49,7 @@ export function SiteFooter() {
         <div className="border-t border-primary-foreground/20 pt-8">
           <div className="flex justify-center gap-6 mb-6">
             <a
-              href="https://youtube.com/@sophinaschool?si=mzLE2jOaDnTWtgKJ"
+              href={safeLink(c("youtube-channel"), DEFAULTS["youtube-channel"])}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-red-500 text-primary-foreground transition-all duration-300 hover:scale-110"
@@ -55,7 +58,7 @@ export function SiteFooter() {
               <Youtube className="w-5 h-5" />
             </a>
             <a
-              href="https://www.instagram.com/sophinaschool"
+              href={safeLink(c("instagram"), DEFAULTS["instagram"])}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-pink-500 text-primary-foreground transition-all duration-300 hover:scale-110"
@@ -64,7 +67,7 @@ export function SiteFooter() {
               <Instagram className="w-5 h-5" />
             </a>
             <a
-              href="https://www.tiktok.com/@sophinaschool1"
+              href={safeLink(c("tiktok"), DEFAULTS["tiktok"])}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-foreground/10 hover:bg-black text-primary-foreground transition-all duration-300 hover:scale-110"

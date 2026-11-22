@@ -5,7 +5,8 @@ import { ImageSlider } from "@/components/image-slider"
 import { ScrollingAnnouncement } from "@/components/scrolling-announcement"
 import { PenTool, BookOpen, Award } from "lucide-react"
 import { SchoolMap } from "@/components/school-map"
-import { getAlbums, getNews, formatPostDate } from "@/lib/site-data"
+import { getAlbums, getNews, getContent, formatPostDate } from "@/lib/site-data"
+import { menuFrom } from "@/lib/content"
 
 // The page refreshes itself every minute, so news and photos posted by the Telegram bot appear quickly
 export const revalidate = 60
@@ -51,14 +52,11 @@ const staticNews: { title: string; date: string; image?: string; description: st
             },
           ]
 
-const portals = [
-  { href: "https://sophinacbt.vercel.app/", label: "CBT Portal", text: "Take tests and exams online", Icon: PenTool },
-  { href: "https://sophinaedu.vercel.app", label: "E-Learning", text: "Access online classroom resources", Icon: BookOpen },
-  { href: "https://sophinarslt.vercel.app", label: "Results", text: "Check your exam results", Icon: Award },
-]
+const portalIcons = [PenTool, BookOpen, Award]
 
 export default async function HomePage() {
-  const [liveNews, albums] = await Promise.all([getNews(6), getAlbums()])
+  const [liveNews, albums, c] = await Promise.all([getNews(6), getAlbums(), getContent()])
+  const portals = menuFrom(c).portals.map((p, i) => ({ ...p, Icon: portalIcons[i] }))
   const newsItems = liveNews
     ? liveNews.map((n) => ({
         title: n.title,
@@ -73,13 +71,13 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Scrolling Announcement */}
-      <ScrollingAnnouncement text="Now accepting applications for the 2026-27 School Year" />
+      {c("ticker").trim().toLowerCase() !== "off" && <ScrollingAnnouncement text={c("ticker")} />}
 
       {/* Hero Section */}
       <ImageSlider
         slides={heroSlides}
-        title="Welcome to Sophina School"
-        subtitle="Nurturing a love for learning and building strong character, in Ogwashi-Uku, Delta State."
+        title={c("home-title")}
+        subtitle={c("home-subtitle")}
       />
 
       {/* Welcome Section */}
@@ -87,10 +85,9 @@ export default async function HomePage() {
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 animate-fade-in-up">
             <div>
-              <h2 className="text-primary mb-6">Welcome to Sophina School</h2>
+              <h2 className="text-primary mb-6">{c("welcome-title")}</h2>
               <p className="text-lg text-muted-foreground leading-8">
-                We foster a culture of excellence, nurturing a love for learning in a supportive environment. Our approach
-                encourages curiosity, creativity, and builds a strong foundation in academics and character development.
+                {c("welcome-text")}
               </p>
             </div>
             <div className="flex gap-4 pt-4">
@@ -108,7 +105,7 @@ export default async function HomePage() {
           </div>
           <div className="aspect-video w-full rounded-2xl overflow-hidden bg-muted shadow-xl animate-scale-in">
             <iframe
-              src="https://www.youtube.com/embed/0WXhVtbvBLE?si=B0MsC1KCWDFjSceQ"
+              src={c("youtube")}
               title="Welcome to Sophina School"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -122,9 +119,9 @@ export default async function HomePage() {
       <section className="section-padding bg-muted/40">
         <div className="container-premium">
           <div className="text-center mb-16">
-            <h2 className="text-primary mb-4">What Sets Us Apart?</h2>
+            <h2 className="text-primary mb-4">{c("apart-title")}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Discover what makes Sophina School a premier educational institution dedicated to excellence
+              {c("apart-subtitle")}
             </p>
           </div>
           <div className="section-spacing">
@@ -132,7 +129,7 @@ export default async function HomePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="aspect-video relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
                 <Image
-                  src="https://i.ibb.co/5hBwY4Tf/photo-2025-12-03-22-33-03.jpg"
+                  src={c("feature1-image")}
                   alt="Students learning"
                   fill
                   className="object-cover"
@@ -141,11 +138,9 @@ export default async function HomePage() {
                 />
               </div>
               <div className="card-elevated">
-                <h3 className="text-3xl text-primary mb-4">Learner-Centered</h3>
+                <h3 className="text-3xl text-primary mb-4">{c("feature1-title")}</h3>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  At Sophina School, students take charge of their learning journey with our
-                  innovative approach to education. Our distinctive environment fosters independence, curiosity, and a
-                  lifelong love for learning.
+                  {c("feature1-text")}
                 </p>
               </div>
             </div>
@@ -153,16 +148,14 @@ export default async function HomePage() {
             {/* Feature 2 */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="card-elevated md:order-first">
-                <h3 className="text-3xl text-primary mb-4">Innovative Curriculum</h3>
+                <h3 className="text-3xl text-primary mb-4">{c("feature2-title")}</h3>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  Our curriculum is designed to challenge and inspire, integrating traditional subjects with modern
-                  skills. We emphasize critical thinking, problem-solving, and creativity to prepare students for future
-                  success.
+                  {c("feature2-text")}
                 </p>
               </div>
               <div className="aspect-video relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
                 <Image
-                  src="https://i.ibb.co/RGt3spWN/PXL-20241022-093659790-1-1-1.png"
+                  src={c("feature2-image")}
                   alt="Innovative curriculum"
                   fill
                   className="object-cover"
@@ -176,7 +169,7 @@ export default async function HomePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="aspect-video relative rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
                 <Image
-                  src="https://i.ibb.co/xKR8G410/photo-2025-12-03-23-15-02.jpg"
+                  src={c("feature3-image")}
                   alt="Holistic development"
                   fill
                   className="object-cover"
@@ -185,10 +178,9 @@ export default async function HomePage() {
                 />
               </div>
               <div className="card-elevated">
-                <h3 className="text-3xl text-primary mb-4">Holistic Development</h3>
+                <h3 className="text-3xl text-primary mb-4">{c("feature3-title")}</h3>
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  We believe in nurturing the whole child. Our programs focus on academic excellence while also
-                  developing social skills, emotional intelligence, and physical well-being.
+                  {c("feature3-text")}
                 </p>
               </div>
             </div>
@@ -199,9 +191,9 @@ export default async function HomePage() {
       {/* News Section */}
       <section className="section-padding container-premium">
         <div className="text-center mb-16">
-          <h2 className="text-primary mb-4">Latest News & Updates</h2>
+          <h2 className="text-primary mb-4">{c("news-title")}</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Stay informed with the latest happenings at Sophina School
+            {c("news-subtitle")}
           </p>
         </div>
         <div className="grid gap-6 max-w-4xl mx-auto">
@@ -229,7 +221,7 @@ export default async function HomePage() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="aspect-video relative rounded-2xl overflow-hidden shadow-xl">
             <Image
-              src="/images/basic8/image2.jpeg"
+              src={c("tech-image")}
               alt="A student working in the Sophina School computer lab"
               fill
               className="object-cover"
@@ -237,10 +229,9 @@ export default async function HomePage() {
             />
           </div>
           <div className="space-y-6">
-            <h2 className="text-primary">Learning with Technology</h2>
+            <h2 className="text-primary">{c("tech-title")}</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Our students learn on computers in our ICT lab and use our own online portals to take tests, study and check
-              their results.
+              {c("tech-text")}
             </p>
             <div className="grid gap-4">
               {portals.map(({ href, label, text, Icon }) => (
@@ -266,17 +257,15 @@ export default async function HomePage() {
       </section>
 
       {/* Map */}
-      <SchoolMap />
+      <SchoolMap address1={c("address-1")} address2={c("address-2")} phone1={c("phone-1")} phone2={c("phone-2")} />
 
       {/* Application CTA */}
       <section className="section-padding bg-muted/40">
         <div className="container-premium text-center space-y-8">
           <div className="space-y-4">
-            <h2 className="text-primary">Ready to Join Sophina School?</h2>
+            <h2 className="text-primary">{c("cta-title")}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Sophina School is dedicated to providing a nurturing and innovative learning environment.
-              Our focus is on building a strong foundation for lifelong learning through creativity, curiosity, and academic
-              excellence.
+              {c("cta-text")}
             </p>
           </div>
           <Link href="/apply">

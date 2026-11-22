@@ -1,30 +1,27 @@
 import Image from "next/image"
 import type { Metadata } from "next"
 import { ClassImageSlider } from "@/components/class-image-slider"
-import { getAlbums, getStaff } from "@/lib/site-data"
+import { getAlbums, getStaff, getContent } from "@/lib/site-data"
 import { slugOf } from "@/lib/albums"
 
 // Refreshes every minute so photos and staff posted by the Telegram bot appear quickly
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: "Our School",
-  description:
-    "Explore our school facilities, classes, and dedicated staff at Sophina School. From Creche to Senior Secondary, we offer comprehensive education.",
-  openGraph: {
-    title: "Our School | Sophina School",
-    description:
-      "Discover our comprehensive educational programs from Creche to Senior Secondary, and meet our dedicated staff.",
-    images: [
-      {
-        url: "https://i.ibb.co/V0MpQTHv/photo-2025-02-13-08-28-22.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Sophina School Facilities",
-      },
-    ],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const c = await getContent()
+  const title = c("seo-school-title")
+  const description = c("seo-school-description")
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | ${c("seo-site-title")}`,
+      description,
+      images: [{ url: c("seo-page-image"), width: 1200, height: 630, alt: "Sophina School Facilities" }],
+    },
+  }
 }
+
 // Colour Day images
 const colourdayImages = [
   "https://i.ibb.co/Y4myKYbx/PXL-20260401-140323920.jpg",
@@ -653,7 +650,7 @@ const staffMembers = [
 ]
 
 export default async function OurSchoolPage() {
-  const [albums, liveStaff] = await Promise.all([getAlbums(), getStaff()])
+  const [albums, liveStaff, c] = await Promise.all([getAlbums(), getStaff(), getContent()])
   const team = liveStaff
     ? liveStaff.map((m) => ({ name: m.name, position: m.position, image: m.image_url || "" }))
     : staffMembers
@@ -676,23 +673,23 @@ export default async function OurSchoolPage() {
       {/* Hero Section */}
       <div className="relative h-96 md:h-[500px] w-full overflow-hidden">
         <Image
-          src="https://i.ibb.co/V0MpQTHv/photo-2025-02-13-08-28-22.jpg"
+          src={c("school-hero-image")}
           alt="Our School"
           fill
           className="object-cover"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-center justify-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-white text-center px-4 drop-shadow-lg">Our School</h1>
+          <h1 className="text-5xl md:text-7xl font-bold text-white text-center px-4 drop-shadow-lg">{c("school-hero-title")}</h1>
         </div>
       </div>
 
       {/* Introduction */}
       <section className="section-padding container-premium text-center">
         <div className="space-y-6 max-w-3xl mx-auto">
-          <h2 className="text-primary">We believe that everyone's a student and everyone's a teacher.</h2>
+          <h2 className="text-primary">{c("school-intro-title")}</h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Our students and staff work together to foster a collaborative learning environment where curiosity thrives and excellence flourishes.
+            {c("school-intro-text")}
           </p>
         </div>
       </section>
@@ -723,9 +720,9 @@ export default async function OurSchoolPage() {
       {/* Staff Section */}
       <section className="section-padding container-premium">
         <div className="text-center mb-16">
-          <h2 className="text-primary mb-4">Meet Our Team</h2>
+          <h2 className="text-primary mb-4">{c("team-title")}</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Dedicated educators and staff committed to your child's success
+            {c("team-subtitle")}
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

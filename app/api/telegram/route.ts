@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { ALBUMS } from "@/lib/albums"
+import { FIELDS, PAGES, fieldOf, youtubeEmbed } from "@/lib/content"
 
 export const runtime = "nodejs"
 export const maxDuration = 30
@@ -34,6 +35,17 @@ STAFF
 • Send a photo with caption:  #staff Mrs. Jane D. | Class Teacher
 • /stafflist  – staff with numbers
 • /deletestaff 7  – remove a staff member
+
+WEBSITE TEXT, LOGO, VIDEO, LINKS
+• /content  – see the pages you can edit
+• /content home  – list everything on a page (home, about, our-school, apply, menu, seo, site)
+• /set welcome-title New heading  – change a text
+• /ticker New scrolling message  (or /ticker off to hide it)
+• /youtube https://youtu.be/xxxx  – change the welcome video
+• Change a picture: send ONE photo with caption #logo  (or #feature1-image, #mission-image ...)
+• Menu names and the CBT / E-Learning / Results buttons:  /content menu
+• What Google and WhatsApp show for the site:  /content seo
+• /reset logo  – bring back the original text or picture
 
 Tip: send pictures as "Photo", not as "File".`
 
@@ -102,9 +114,79 @@ async function removeStored(urls: string[]) {
 
 function refreshSite() {
   try {
-    revalidatePath("/")
-    revalidatePath("/our-school")
+    revalidatePath("/", "layout")
   } catch {}
+}
+
+// ---------- editable texts, pictures and links ----------
+const PUBLIC_PREFIX = () => `${SB_URL}/storage/v1/object/public/${BUCKET}/`
+const preview = (v: string) => {
+  const one = v.replace(/\s+/g, " ").trim()
+  return one.length > 70 ? one.slice(0, 67) + "..." : one
+}
+
+async function currentOverrides(): Promise<Record<string, string>> {
+  const rows = await sb("site_content?select=key,value")
+  return Object.fromEntries(rows.map((r: any) => [r.key, r.value as string]))
+}
+
+// Saves a new value for one field. For pictures, the old uploaded picture is removed from storage.
+async function saveContent(key: string, value: string) {
+  const old = await sb(`site_content?key=eq.${key}&select=value`)
+  await sb("site_content?on_conflict=key", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({ key, value, updated_at: new Date().toISOString() }),
+  })
+  if (old[0]?.value && old[0].value !== value) await removeStored([old[0].value])
+  refreshSite()
+}
+
+async function setField(chat: number, keyRaw: string, valueRaw: string) {
+  const field = fieldOf(keyRaw)
+  if (!field) return say(chat, `I do not know "${keyRaw}". Send /content to see the pages, then for example /content home to see the names.`)
+  let value = valueRaw.trim()
+  if (!value) return say(chat, `Write it like:  /set ${field.key} your new text\n\nNow: ${preview((await currentOverrides())[field.key] ?? field.default)}`)
+  if (value.length > 1800) return say(chat, "That is too long. Please keep it under 1800 letters.")
+  if (field.type === "youtube") {
+    const embed = youtubeEmbed(value)
+    if (!embed) return say(chat, "That does not look like a YouTube link. Copy the link of the video from YouTube (it looks like https://youtu.be/abc... or https://www.youtube.com/watch?v=abc...) and try again.")
+    value = embed
+  } else if (field.type === "link" || field.type === "image") {
+    if (!/^https?:\/\/\S+$/i.test(value)) {
+      return say(chat, field.type === "image"
+        ? `To change this picture, send ONE photo with the caption  #${field.key}`
+        : "A link must start with https://")
+    }
+  }
+  await saveContent(field.key, value)
+  return say(chat, `Done. "${field.label}" is changed. The website shows it within a minute.\nTo go back to the original: /reset ${field.key}`)
+}
+
+async function resetField(chat: number, keyRaw: string) {
+  const field = fieldOf(keyRaw)
+  if (!field) return say(chat, `I do not know "${keyRaw}". Send /content to see the names.`)
+  const rows = await sb(`site_content?key=eq.${field.key}`, { method: "DELETE" })
+  await removeStored(rows.map((r: any) => r.value))
+  refreshSite()
+  return say(chat, rows.length ? `"${field.label}" is back to the original.` : `"${field.label}" was never changed, so it is already the original.`)
+}
+
+async function listContent(chat: number, pageRaw: string) {
+  const slug = pageRaw.trim().toLowerCase()
+  if (!slug) {
+    return say(chat, "Pages you can edit:\n" + PAGES.map((p) => `${p.slug} - ${p.label}`).join("\n") +
+      "\n\nSend /content followed by the page name (for example /content home) to see the names of everything on that page.\nClass photos and staff are managed with /albums and #staff (see /help).")
+  }
+  const page = PAGES.find((p) => p.slug === slug)
+  if (!page) return say(chat, `I do not know the page "${slug}". Send /content to see the pages.`)
+  const changed = await currentOverrides()
+  const lines = FIELDS.filter((x) => x.page === slug).map((x) => {
+    const mine = changed[x.key]
+    const shown = x.type === "image" ? (mine ? "(your own picture)" : "(original picture)") : preview(mine ?? x.default)
+    return `${mine ? "* " : ""}${x.key}${x.type === "image" ? " [picture]" : ""}\n   ${x.label}: ${shown}`
+  })
+  return say(chat, `${page.label}\n(* = you changed it)\n\n${lines.join("\n")}\n\nText: /set name new text\nPicture: send a photo with the caption #name\nUndo: /reset name`)
 }
 
 function parseNews(caption: string) {
@@ -150,7 +232,13 @@ async function handle(msg: any) {
     const tag = raw.match(/^#([a-z0-9-]+)/i)
     if (tag) {
       const slug = tag[1].toLowerCase()
-      if (!albumLabel(slug)) return say(chat, `I do not know the album "${slug}". Send /albums to see the names.`)
+      const field = fieldOf(slug)
+      if (!albumLabel(slug) && field?.type === "image") {
+        const url = await savePhoto(photo.file_id, "content")
+        await saveContent(field.key, url)
+        return say(chat, `Done. "${field.label}" is changed. The website shows it within a minute.\nTo go back to the original: /reset ${field.key}`)
+      }
+      if (!albumLabel(slug)) return say(chat, `I do not know "${slug}". Send /albums to see the photo album names, or /content to see the names of the website pictures you can change.`)
       const url = await savePhoto(photo.file_id, slug)
       const caption = raw.replace(/^#[a-z0-9-]+/i, "").trim() || null
       const [row] = await sb("site_photos", { method: "POST", body: JSON.stringify({ album: slug, image_url: url, caption }) })
@@ -182,6 +270,25 @@ async function handle(msg: any) {
     case "/start":
     case "/help":
       return say(chat, HELP)
+
+    case "/content":
+      return listContent(chat, rest)
+
+    case "/set": {
+      const m = rest.match(/^(\S+)\s*([\s\S]*)$/)
+      if (!m) return say(chat, "Write it like:  /set welcome-title New heading\nSend /content to see the names.")
+      return setField(chat, m[1], m[2])
+    }
+
+    case "/reset":
+      if (!rest) return say(chat, "Write it like:  /reset logo")
+      return resetField(chat, rest.split(/\s+/)[0])
+
+    case "/ticker":
+      return setField(chat, "ticker", rest)
+
+    case "/youtube":
+      return setField(chat, "youtube", rest)
 
     case "/albums":
       return say(chat, "Album names (use the part before the dash):\n" + ALBUMS.map((a) => `${a.slug} - ${a.label}`).join("\n"))
